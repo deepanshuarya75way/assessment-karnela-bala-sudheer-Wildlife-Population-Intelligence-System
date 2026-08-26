@@ -5,9 +5,12 @@ from pathlib import Path
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.database.base import Base
+from app.database.session import engine
 
 settings = get_settings()
 configure_logging(settings.log_level)
+Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Wildlife Population Intelligence System API", version="1.0.0")
 UPLOADS_DIR = Path(__file__).resolve().parents[1] / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
