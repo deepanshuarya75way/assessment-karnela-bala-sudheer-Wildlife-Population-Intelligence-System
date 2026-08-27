@@ -176,6 +176,24 @@ The database stores users, species, images, individual image detections, audio r
 
 ## Troubleshooting
 
+### Render deployment
+
+Set these environment variables on the Render backend service:
+
+```env
+DATABASE_URL=postgresql+psycopg://...
+SECRET_KEY=<long-random-secret>
+CORS_ORIGINS=https://wildlife-population-frontend.onrender.com
+```
+
+Set this variable on the Render frontend service **before rebuilding**:
+
+```env
+NEXT_PUBLIC_API_URL=https://wildlife-population-backend.onrender.com/api/v1
+```
+
+`NEXT_PUBLIC_API_URL` is compiled into the Next.js browser bundle, so changing it requires a new frontend deploy. After logging in, if an upload returns `401`, sign out and sign in again to replace an expired token. The upload endpoints require a valid bearer token and an allowed role.
+
 If port 8000 is already in use:
 
 ```bash

@@ -1,4 +1,7 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+// NEXT_PUBLIC_API_URL is baked into the production bundle by Next.js. Normalize
+// it once so a Render environment value with a trailing slash never produces
+// URLs such as `/api/v1//images/upload`.
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1").replace(/\/+$/, "");
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) { super(message); }
@@ -11,7 +14,10 @@ export async function api<T>(path: string, options: RequestInit = {}, token?: st
   const response = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new ApiError(body.detail ?? "The request could not be completed.", response.status);
+    const message = response.status === 401
+      ? "Your session has expired. Sign in again and retry the upload."
+      : body.detail ?? "The request could not be completed.";
+    throw new ApiError(message, response.status);
   }
   return response.status === 204 ? undefined as T : response.json() as Promise<T>;
 }
@@ -25,9 +31,9 @@ export type DashboardData = { total_species: number; total_population: number; i
 export type DetectionBox = { id:number; class_id:number; confidence:number; bbox:number[]; species:{common_name:string;scientific_name:string} };
 export type Detection = { id:number; file_name:string; annotated_image_url?:string|null; detections?:DetectionBox[]; species?:{common_name:string;scientific_name:string}; animal_count?:number|null; confidence:number|null; location:string|null; status:string; created_at:string };
 export const getImages = (token: string) => api<Detection[]>("/images/recent", {}, token);
-export const uploadImage = (file: File, token: string, location?: string) => { const data = new FormData(); data.append("file", file); if (location) data.append("location", location); return api<Detection>("/images/upload", { method: "POST", body: data }, token); };
+export const uploadImage = (file: File, token: string, location?: string) => { if (!token) throw new ApiError("You must sign in before uploading an image.", 401); const data = new FormData(); data.append("file", file); if (location) data.append("location", location); return api<Detection>("/images/upload", { method: "POST", body: data }, token); };
 export const getAudio = (token: string) => api<Detection[]>("/audio/recent", {}, token);
-export const uploadAudio = (file: File, token: string, location?: string) => { const data = new FormData(); data.append("file", file); if (location) data.append("location", location); return api<Detection>("/audio/upload", { method: "POST", body: data }, token); };
+export const uploadAudio = (file: File, token: string, location?: string) => { if (!token) throw new ApiError("You must sign in before uploading a recording.", 401); const data = new FormData(); data.append("file", file); if (location) data.append("location", location); return api<Detection>("/audio/upload", { method: "POST", body: data }, token); };
 
 export type Species = { id: number; common_name: string; scientific_name: string; species_group: string; iucn_status: string; description?: string | null; habitat?: string | null; diet?: string | null; created_at: string; updated_at: string };
 export type SpeciesInput = Pick<Species, "common_name" | "scientific_name" | "species_group" | "iucn_status"> & Partial<Pick<Species, "description" | "habitat" | "diet">>;

@@ -44,13 +44,22 @@ def model_file(name: str) -> Path | None:
     candidate = MODEL_DIR / name
     return candidate if candidate.is_file() else None
 
-
 @lru_cache
 def image_model():
     path = model_file("best.pt")
-    if path is None: return None
+    if path is None:
+        return None
+
     from ultralytics import YOLO
-    return YOLO(path)
+
+    logger.info("Loading YOLO image model from %s", path)
+
+    model = YOLO(str(path))
+    model.to("cpu")
+
+    logger.info("YOLO image model loaded successfully")
+
+    return model
 
 
 @lru_cache
