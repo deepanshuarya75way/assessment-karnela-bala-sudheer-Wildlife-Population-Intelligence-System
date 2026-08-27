@@ -140,6 +140,28 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 
 Open `http://localhost:3000`.
 
+## Deploying the Frontend to Vercel
+
+Keep the FastAPI backend deployed on Render and deploy only the `frontend` directory to Vercel.
+
+1. Import the GitHub repository into Vercel.
+2. Set **Root Directory** to `frontend`.
+3. Leave the framework as **Next.js**.
+4. Add this production environment variable:
+
+```env
+NEXT_PUBLIC_API_URL=https://YOUR-RENDER-BACKEND.onrender.com/api/v1
+```
+
+5. Deploy the project.
+6. In the Render backend environment, update CORS with the exact Vercel URL:
+
+```env
+CORS_ORIGINS=https://YOUR-PROJECT.vercel.app
+```
+
+Redeploy the backend after changing CORS. After the Vercel deployment, sign in again so the browser stores a fresh token. The frontend must never use `localhost` as its production API URL.
+
 ## Detection Pipelines
 
 ### Image Detection
