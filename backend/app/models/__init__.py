@@ -5,5 +5,6 @@ from app.models.population import Population
 from app.models.report import Report
 from app.models.species import Species
 from app.models.user import User
+from app.models.alert import PopulationAlert
 
 __all__ = ["Audio", "Image", "ImageDetection", "Population", "Report", "Species", "User"]
