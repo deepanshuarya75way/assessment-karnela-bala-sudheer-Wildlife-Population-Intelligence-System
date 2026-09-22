@@ -8,7 +8,9 @@ from app.api.v1.reports.router import router as reports_router
 from app.api.v1.settings.router import router as settings_router
 from app.api.v1.species.router import router as species_router
 from app.api.v1.users.router import router as users_router
+from app.api.v1.alerts.router import router as alerts_router
 
 api_router = APIRouter(prefix="/api/v1")
 for module_router in (auth_router, users_router, species_router, population_router, images_router, audio_router, analytics_router, reports_router, settings_router):
     api_router.include_router(module_router)
+router.include_router(alerts_router)
